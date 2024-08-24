@@ -31,16 +31,30 @@ pub fn bench_sum_u64s(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("sum 100,000 u64s");
 
-    group.bench_with_input(BenchmarkId::new("sov", "sov"), &vec_foo, |b, input| {
+    group.bench_with_input(BenchmarkId::new("u64s", "sov"), &vec_foo, |b, input| {
         b.iter(|| {
             let sum: u64 = black_box(input).xs().iter().copied().sum();
             black_box(sum);
         })
     });
 
-    group.bench_with_input(BenchmarkId::new("naive", "naive"), &vec, |b, input| {
+    group.bench_with_input(BenchmarkId::new("u64s", "naive"), &vec, |b, input| {
         b.iter(|| {
             let sum: u64 = black_box(input).iter().map(|foo| foo.x).sum();
+            black_box(sum);
+        })
+    });
+
+    group.bench_with_input(BenchmarkId::new("u8s", "sov"), &vec_foo, |b, input| {
+        b.iter(|| {
+            let sum: u8 = black_box(input).ys().iter().copied().sum();
+            black_box(sum);
+        })
+    });
+
+    group.bench_with_input(BenchmarkId::new("u8s", "naive"), &vec, |b, input| {
+        b.iter(|| {
+            let sum: u8 = black_box(input).iter().map(|foo| foo.y).sum();
             black_box(sum);
         })
     });
