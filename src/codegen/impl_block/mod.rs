@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, quote_spanned};
-use syn::{parse_quote, spanned::Spanned, Field, Visibility};
+use syn::{parse_quote, spanned::Spanned, Visibility};
 
 use crate::{
     parse::Input,
@@ -9,10 +9,12 @@ use crate::{
 
 use super::structs::StructNames;
 
+mod constructors;
+mod remove;
+
 pub(super) fn generate_impl_block(input: &Input, struct_names: &StructNames) -> TokenStream {
     let name = &struct_names.vec;
-    let new = gen_new(input);
-    let with_capacity = gen_with_capacity(input);
+    let constructors = constructors::codegen(input);
     let get = get(input, struct_names);
     let push = push(input, struct_names);
     let field_accessors = field_accessors(input);
@@ -20,46 +22,11 @@ pub(super) fn generate_impl_block(input: &Input, struct_names: &StructNames) -> 
 
     quote! {
         impl #name {
-            #new
-            #with_capacity
+            #constructors
             #get
             #push
             #field_accessors
             #len_is_empty
-        }
-    }
-}
-
-fn gen_new(input: &Input) -> TokenStream {
-    let fields = input.map_fields_with_delimiters(
-        |field| {
-            let name = &field.ident.as_ref().unwrap();
-            quote! { #name: ::std::vec::Vec::new()}
-        },
-        |_, _| quote! {::std::vec::Vec::new()},
-    );
-
-    quote! {
-        #[inline]
-        pub fn new() -> Self {
-            Self #fields
-        }
-    }
-}
-
-fn gen_with_capacity(input: &Input) -> TokenStream {
-    let fields = input.map_fields_with_delimiters(
-        |field| {
-            let name = &field.ident.as_ref().unwrap();
-            quote! { #name: ::std::vec::Vec::with_capacity(capacity)}
-        },
-        |_, _| quote! {::std::vec::Vec::with_capacity(capacity)},
-    );
-
-    quote! {
-        #[inline]
-        pub fn with_capacity(capacity: ::core::primitive::usize) -> Self {
-            Self #fields
         }
     }
 }

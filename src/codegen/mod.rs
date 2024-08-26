@@ -3,14 +3,14 @@ use quote::quote;
 
 use crate::parse::Input;
 
-mod main_impl_block;
+mod impl_block;
 mod structs;
 
 pub fn codegen(input: Input) -> TokenStream {
     let vis = &input.vis;
     let (vec, ref_and_ref_mut, struct_names) = structs::codegen_structs(&input);
 
-    let impl_block = main_impl_block::generate_impl_block(&input, &struct_names);
+    let impl_block = impl_block::generate_impl_block(&input, &struct_names);
     let mod_name = &struct_names.module;
 
     let vec_name = &struct_names.vec;
